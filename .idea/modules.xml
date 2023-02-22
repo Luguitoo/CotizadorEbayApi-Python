@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/ebayapi.iml" filepath="$PROJECT_DIR$/.idea/ebayapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../pillowpython/.idea/pillowpython.iml" filepath="$PROJECT_DIR$/../pillowpython/.idea/pillowpython.iml" />
     </modules>
   </component>
 </project>
