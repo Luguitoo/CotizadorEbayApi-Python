@@ -1,11 +1,20 @@
 
+#EbaySDK
 from ebaysdk.finding import Connection
 import datetime
-from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
 
-load_dotenv()
+#Web scraping
+import requests
+from bs4 import BeautifulSoup
+r = requests.get('https://www.cambioschaco.com.py') #Url de donde obtener los datos
+soup = BeautifulSoup(r.text, 'html.parser')
+cotizacion = soup.find_all('span', class_="sale", limit = 1) #Dolar
+#print(cotizacion[0].text.replace('.', ""))
+dolar = float(cotizacion[0].text.replace('.', ""))
+print(f"Dolar hoy: {cotizacion[0].text}")
 API_KEY = "cARLOSLu-Directod-PRD-a2e2968b1-8eb57663"
+
 obj = input("Que quieres buscar?")
 cap = input("De cuantos gb?")
 lista = []
@@ -35,25 +44,31 @@ class Ebay(object):
                         if len(x1) > 1 and len(x) > 1:
                             c = item.title.split("Pro Max")
                             if len(c) > 1:
-                                print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
+                                #print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}, Capacidad {item.capacity}")
                                 lista.append(item)
                         if len(x) > 1:
                             c = item.title.split("Pro Max")
                             if len(c) == 1:
-                                print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
+                                #print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
                                 lista.append(item)
                     else:
                         x = item.title.split("Pro Max")
                         x1 = item.title.split("Pro")
                         if len(x1) == 1 and len(x) == 1:
-                            print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
+                            #print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
                             lista.append(item)
-
-            self.resultado = lista[0]
+            resultado = []
+            for item in lista:
+                x = item.title.split("GB")
+                if len(x) == 2:
+                    resultado.append(item)
+            print("Lista filtrada: ")
+            for item in resultado:
+                print(f"Title: {item.title}, Price {item.sellingStatus.currentPrice.value}, Condition {item.condition.conditionId}")
+            self.resultado = resultado[0]
         except ConnectionError as e:
             print(e)
             print(e.response.dict())
-
     def parse(self):
         pass
 
@@ -61,7 +76,9 @@ if __name__ == "__main__":
     e = Ebay(API_KEY, obj, cap, "")
     e.fetch()
     busqueda = e.resultado
-    precio = str(int(float(busqueda.sellingStatus.currentPrice.value) * 7460))
+    #print(busqueda)
+    precio = str(int(float(busqueda.sellingStatus.currentPrice.value) * dolar))
+    #print(precio)
     a = list(precio)
     nr = ""
     cont = len(precio)
@@ -70,9 +87,9 @@ if __name__ == "__main__":
         cont -= 1
         if cont % 3 == 0 and i != len(precio) - 1:
             nr = nr + "."
-    print("Encontre esto: ")
+    print("Mejor elección: ")
     titulo = str(busqueda.title)
-    print(titulo)
+    #print(titulo)
     traductor = GoogleTranslator(source='en', target='es')
     titulo = traductor.translate(busqueda.title)
     condicion = traductor.translate(busqueda.condition.conditionDisplayName)
