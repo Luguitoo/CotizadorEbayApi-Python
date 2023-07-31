@@ -21,6 +21,29 @@ with open('key.txt', 'r') as f:
     API_KEY = f.readline().strip()
     #print(API_KEY)
 
+#Leer la config del user
+def read_config(file_path):
+    config_data = {}
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if line.startswith('Profits:'):
+                config_data['Profits'] = int(line.split(':')[1].strip())
+                print(int(line.split(':')[1].strip()))
+            elif line.startswith('Shipping:'):
+                config_data['Shipping'] = int(line.split(':')[1].strip())
+            elif line.startswith('Template:'):
+                config_data['Template'] = int(line.split(':')[1].strip())
+
+    return config_data
+
+config_data = read_config("config.txt")
+print("Configuración leída:")
+print("Profits:", config_data.get('Profits'))
+print("Shipping:", config_data.get('Shipping'))
+print("Template:", config_data.get('Template'))
+
 class Ebay(object):
     def __init__(self, API_KEY, keyword, capacity, resultado):
         self.api_key = API_KEY
@@ -112,16 +135,27 @@ def make_win1():
             ]
      # Columna 2:
 
-    col2 = [[sg.Text(" ",key='bus_p'), sg.Text(" ",key='bus_c')],
+    col2 = [[sg.Button('Opciones', key='-SETTINGS-')],
+            [sg.Text(" ",key='bus_p'), sg.Text(" ",key='bus_c')],
             [sg.Table(data, headings=headings, justification='left', key='ta_p', enable_events=True, col_widths=[60, 10, 15, 60])],
             [sg.Text("Costo total:  "), sg.Text(" ",key='ttv'), sg.Text("Ganancias:  "), sg.Text(" ",key='ttg'), sg.Button('Exportar presupusto')]]
 
-    layout = [[sg.Column(col1), sg.Column(col2, element_justification='')]]
+    layout = [[sg.Column(col1), sg.Column(col2, element_justification='right')]]
 
     return sg.Window('Cotizaciones de productos', layout, location=(800,600), finalize=True)
 
-
-window1= make_win1(), None
+def make_win2():
+    layout = [
+            [sg.Text("Opciones:")],
+            [sg.Text("Ganacias:"), sg.Input(key='ganancias', size=(20, 1)), sg.Text("USD")],
+            [sg.Text("Costo envio:"), sg.Input(key='pro', size=(20, 1)), sg.Text("USD")],
+            [sg.Text("Tema: ")],
+            [sg.Radio("Naranja", "RADIO1", default=True), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
+            [sg.Radio("Amarillo", "RADIO1"), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
+            [sg.Radio("Verde", "RADIO1"), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+            [sg.Button('Cerrar')]
+    ]
+    return sg.Window('Segunda Ventana', layout, finalize=True)
 
 # Definimos una lista para almacenar los productos
 productos = []
@@ -129,6 +163,16 @@ productos = []
 def act():
     window["ta_p"].update(values=productos)
     window.refresh()
+
+
+def open_win2():
+    window2 = make_win2()
+    while True:
+        event, values = window2.read()
+        if event == sg.WIN_CLOSED or event == 'Cerrar':
+            break
+    window2.close()
+window1, window2 = make_win1(), None
 
 while True:
     window, event, values = sg.read_all_windows()
@@ -138,7 +182,9 @@ while True:
         ##if window == window2:       # if closing win 2, mark as closed
             ##window2 = None
         if window == window1: # if closing win 1, exit program
-            break    
+            break 
+    elif event == '-SETTINGS-':
+        open_win2()   
     elif event == 'Buscar' :
         pro = (values['pro']).lower()   #minisculas
         capacidades = []
@@ -161,7 +207,7 @@ while True:
                 #print(busqueda)
                 # Tiene 7% de taxes  y 50mil cuesta el envio, recargar eso
                 precio = str(int(float(busqueda.sellingStatus.currentPrice.value) * dolar))
-                preciov = str((int((float(busqueda.sellingStatus.currentPrice.value) + 70) * dolar)))
+                preciov = str((int((float(busqueda.sellingStatus.currentPrice.value) + config_data.get('Profits') + config_data.get('Shipping')) * dolar)))
                 # print(precio)
                 a = list(precio)
                 # print(precio)
