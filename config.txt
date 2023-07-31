@@ -1,5 +1,5 @@
 ----SETTINGS----
 
-Profits: 70
+Profits: 63
 Shipping: 7
-Template: 1
+Template: 2

@@ -44,6 +44,27 @@ print("Profits:", config_data.get('Profits'))
 print("Shipping:", config_data.get('Shipping'))
 print("Template:", config_data.get('Template'))
 
+#Guardar los datos del config.txt
+def update_config_file(ganancias, envio, tema):
+    # Leer el contenido del archivo
+    with open("config.txt", "r") as file:
+        content = file.readlines()
+
+    # Actualizar los valores en el contenido
+    updated_content = []
+    for line in content:
+        if "Profits:" in line:
+            line = f"Profits: {ganancias}\n"
+        elif "Shipping:" in line:
+            line = f"Shipping: {envio}\n"
+        elif "Template:" in line:
+            line = f"Template: {tema}\n"
+        updated_content.append(line)
+
+    # Escribir el contenido actualizado nuevamente en el archivo
+    with open("config.txt", "w") as file:
+        file.writelines(updated_content)
+
 class Ebay(object):
     def __init__(self, API_KEY, keyword, capacity, resultado):
         self.api_key = API_KEY
@@ -121,8 +142,26 @@ def pre_puntos(precio):
     #print(nr)
     return nr  
 #tema simplegui
-sg.theme("reddit")
+##sg.theme("reddit")
+# Definir el esquema de colores naranjas
+my_orange_theme = {
+    'BACKGROUND': 'white',
+    'TEXT': 'black',
+    'INPUT': '#FFFFFF',
+    'TEXT_INPUT': 'black',
+    'SCROLL': '#FFD700',
+    'BUTTON': ('white', '#FFA500'),
+    'PROGRESS': ('#01826B', '#D0D0D0'),
+    'BORDER': 1,
+    'SLIDER_DEPTH': 0,
+    'PROGRESS_DEPTH': 0,
+}
 
+# Agregar el esquema de colores a la lista de temas
+sg.theme_add_new('MyOrangeTheme', my_orange_theme)
+
+# Establecer el tema predeterminado
+sg.theme('MyOrangeTheme')
 #Cabecera, Productos
 headings= ['Producto', 'Capacidad','Costo', 'Venta', 'Condición']
 data = []
@@ -147,13 +186,13 @@ def make_win1():
 def make_win2():
     layout = [
             [sg.Text("Opciones:")],
-            [sg.Text("Ganacias:"), sg.Input(key='ganancias', size=(20, 1)), sg.Text("USD")],
-            [sg.Text("Costo envio:"), sg.Input(key='pro', size=(20, 1)), sg.Text("USD")],
-            [sg.Text("Tema: ")],
-            [sg.Radio("Naranja", "RADIO1", default=True), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
-            [sg.Radio("Amarillo", "RADIO1"), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
-            [sg.Radio("Verde", "RADIO1"), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
-            [sg.Button('Cerrar')]
+            [sg.Text("Ganacias:"), sg.Input(key='ganancias', size=(20, 1), default_text=config_data.get('Profits')), sg.Text("USD")],
+            [sg.Text("Costo envio:"), sg.Input(key='ship', size=(20, 1), default_text=config_data.get('Shipping')), sg.Text("USD")],
+            [sg.Text("Tema de imagenes: ")],
+            [sg.Radio("Naranja ", "tema", key="Naranja", default=True), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
+            [sg.Radio("Amarillo", "tema", key="Amarillo",), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
+            [sg.Radio("Verde   ", "tema", key="Verde",), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+            [sg.Button('Guardar'),sg.Button('Cerrar')]
     ]
     return sg.Window('Segunda Ventana', layout, finalize=True)
 
@@ -170,6 +209,24 @@ def open_win2():
     while True:
         event, values = window2.read()
         if event == sg.WIN_CLOSED or event == 'Cerrar':
+            break
+        elif event == "Guardar":
+            gana = int((values['ganancias']))
+            env = int((values['ship']))
+            #Obtener el valor seleccionado en el grupo de radio buttons
+            if values["Naranja"]:
+                tema = 1
+            elif values["Amarillo"]:
+                tema = 2
+            elif values["Verde"]:
+                tema = 3
+            print(env, gana, tema) 
+            # Actualizar el archivo de configuración con los nuevos valores
+            update_config_file(gana, env, tema)
+            #Actualiza los datos de la sesion
+            config_data['Profits'] = gana
+            config_data['Shipping'] = env
+            config_data['Template'] = tema
             break
     window2.close()
 window1, window2 = make_win1(), None
