@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 from ebaysdk.finding import Connection
 import datetime
 from deep_translator import GoogleTranslator
+#Pillow para crea imagenes
+from PIL import Image #Para cargar las imagenes
+from PIL import ImageDraw #para dibujar
+from PIL import ImageOps #Reescalado
+from PIL import ImageFont #Fuentes
 
 r = requests.get('https://www.cambioschaco.com.py') #Url de donde obtener los datos
 soup = BeautifulSoup(r.text, 'html.parser')
@@ -141,6 +146,55 @@ def pre_puntos(precio):
             nr = nr + "."
     #print(nr)
     return nr  
+#Convertir los productos a imagenes
+#Convertir el precio a un numero con puntos y redondeado
+def pre_puntos(precio):
+    a = list(precio)
+    nr = ""
+    cont = len(precio)
+    for j in range(0, len(precio)):
+        if j > 3:
+            nr = nr + "0"
+        else:
+            nr = nr + a[j]
+        cont -= 1
+        if cont % 3 == 0 and j != len(precio) - 1:
+            nr = nr + "."
+    #print(nr)
+    return nr
+
+
+def conv_img(nombre, precios):
+    #Crea una imagen del producto con su precio...
+    print(f"Procesando: {nombre}")
+    dir_img = "./imagenes/"
+    dir_rec = "./recursos"
+    dir_save = "./post"
+    #Background
+    image = Image.open(dir_img + f"{nombre}.png")
+    draw = ImageDraw.Draw(image)
+
+
+    #Escribimos precio y titulo #500, 900
+
+    precio1 = precios[0] + " Gs"
+    precio2 = precios[1] + " Gs"
+    if len(precios) == 2:
+        fuente = ImageFont.truetype(dir_rec + "Antonio-Bold.ttf", size=67, encoding="UTF-8")
+        ancho, alto = draw.textsize(precio1, font=fuente)
+        draw.text((800 - ancho // 2, 318 - alto // 2), precio1, font=fuente,fill=(39, 39, 39))
+        draw.text((805 - ancho // 2, 684 - alto // 2), precio2, font=fuente,fill=(39, 39, 39))
+    else:
+        precio3 = precios[2] + " Gs"
+        fuente = ImageFont.truetype(dir_rec + "Antonio-Bold.ttf", size=60, encoding="UTF-8")
+        ancho, alto = draw.textsize(precio1, font=fuente)
+        draw.text((800 - ancho // 2, 267 - alto // 2), precio1, font=fuente,fill=(39, 39, 39))
+        draw.text((805 - ancho // 2, 538 - alto // 2), precio2, font=fuente,fill=(39, 39, 39))
+        draw.text((805 - ancho // 2, 775 - alto // 2), precio3, font=fuente,fill=(39, 39, 39))
+    #guardamos la imagen del producto
+    image.save(dir_save + nombre + ".png")
+    print("Success")
+    return 0
 #tema simplegui
 ##sg.theme("reddit")
 # Definir el esquema de colores naranjas
@@ -177,7 +231,7 @@ def make_win1():
     col2 = [[sg.Button('Opciones', key='-SETTINGS-')],
             [sg.Text(" ",key='bus_p'), sg.Text(" ",key='bus_c')],
             [sg.Table(data, headings=headings, justification='left', key='ta_p', enable_events=True, col_widths=[60, 10, 15, 60])],
-            [sg.Text("Costo total:  "), sg.Text(" ",key='ttv'), sg.Text("Ganancias:  "), sg.Text(" ",key='ttg'), sg.Button('Exportar presupusto')]]
+            [sg.Text("Costo total:  "), sg.Text("0",key='ttc'), sg.Text("Ganancias:  "), sg.Text("0",key='ttg'), sg.Button('Exportar presupusto'), sg.Button('Generar publicaciones')]]
 
     layout = [[sg.Column(col1), sg.Column(col2, element_justification='right')]]
 
@@ -196,13 +250,13 @@ def make_win2():
     ]
     return sg.Window('Segunda Ventana', layout, finalize=True)
 
+
 # Definimos una lista para almacenar los productos
 productos = []
 #Actualizacion tabla de productos
 def act():
     window["ta_p"].update(values=productos)
     window.refresh()
-
 
 def open_win2():
     window2 = make_win2()
@@ -230,6 +284,9 @@ def open_win2():
             break
     window2.close()
 window1, window2 = make_win1(), None
+
+costo_t = 0
+gasto_t = 0
 
 while True:
     window, event, values = sg.read_all_windows()
@@ -283,5 +340,14 @@ while True:
                 nombre = busqueda.title.split()
                 producto = [nombre[1] + " " + nombre[2],capacidades[x] + " GB",preciob, preciov, condicion]
                 productos.append(producto)
+                #Actualizar valores de costos y ganancias
+                preciob = preciob.replace('.', '')       # Eliminar los puntos de la cadena
+                costo_t += float(preciob)
+                costo = '{:,.0f}'.format(costo_t)
+                window1['ttc'].update(costo)
+                preciov = preciov.replace('.', '')
+                gasto_t += float(preciov)
+                gasto = '{:,.0f}'.format(gasto_t)
+                window1['ttg'].update(gasto)
                 act()
                 producto = []
