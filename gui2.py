@@ -168,15 +168,19 @@ def conv_img(nombre, precios):
     #Crea una imagen del producto con su precio...
     print(f"Procesando: {nombre}")
     dir_img = "./imagenes/"
-    dir_rec = "./recursos"
-    dir_save = "./post"
+    dir_rec = "./recursos/"
+    dir_save = "./post/"
     #Background
-    image = Image.open(dir_img + f"{nombre}.png")
+    if int(config_data.get('Template')) == 1:
+        image = Image.open(dir_img + f"{nombre}-Orange.png")
+    elif int(config_data.get('Template')) == 2:
+        image = Image.open(dir_img + f"{nombre}-Yellow.png")
+    elif int(config_data.get('Template')) == 3:
+        image = Image.open(dir_img + f"{nombre}-Green.png")
     draw = ImageDraw.Draw(image)
-
+    print(precios)
 
     #Escribimos precio y titulo #500, 900
-
     precio1 = precios[0] + " Gs"
     precio2 = precios[1] + " Gs"
     if len(precios) == 2:
@@ -194,6 +198,7 @@ def conv_img(nombre, precios):
     #guardamos la imagen del producto
     image.save(dir_save + nombre + ".png")
     print("Success")
+    precios = []
     return 0
 #tema simplegui
 ##sg.theme("reddit")
@@ -238,21 +243,37 @@ def make_win1():
     return sg.Window('Cotizaciones de productos', layout, location=(800,600), finalize=True)
 
 def make_win2():
+    #temas
+    if int(config_data.get('Template')) == 1:
+        tema_imagenes = [[sg.Radio("Naranja ", "tema", key="Naranja", default=True), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
+                        [sg.Radio("Amarillo", "tema", key="Amarillo",), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
+                        [sg.Radio("Verde   ", "tema", key="Verde",), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+                        ]
+    elif int(config_data.get('Template')) == 2:
+        tema_imagenes = [[sg.Radio("Naranja ", "tema", key="Naranja", ), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
+                        [sg.Radio("Amarillo", "tema", key="Amarillo", default=True), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
+                        [sg.Radio("Verde   ", "tema", key="Verde",), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+                        ]
+    elif int(config_data.get('Template')) == 3:
+        tema_imagenes = [[sg.Radio("Naranja ", "tema", key="Naranja", ), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
+                        [sg.Radio("Amarillo", "tema", key="Amarillo", ), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
+                        [sg.Radio("Verde   ", "tema", key="Verde", default=True), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+                        ]
     layout = [
             [sg.Text("Opciones:")],
             [sg.Text("Ganacias:"), sg.Input(key='ganancias', size=(20, 1), default_text=config_data.get('Profits')), sg.Text("USD")],
             [sg.Text("Costo envio:"), sg.Input(key='ship', size=(20, 1), default_text=config_data.get('Shipping')), sg.Text("USD")],
             [sg.Text("Tema de imagenes: ")],
-            [sg.Radio("Naranja ", "tema", key="Naranja", default=True), sg.Image(filename='imagenes/preview1.png', size=(100, 80))],
-            [sg.Radio("Amarillo", "tema", key="Amarillo",), sg.Image(filename='imagenes/preview2.png', size=(100, 80))],
-            [sg.Radio("Verde   ", "tema", key="Verde",), sg.Image(filename='imagenes/preview3.png', size=(100, 80))],
+            *tema_imagenes,  # Utilizamos el operador * para desempaquetar la lista de opciones del tema
             [sg.Button('Guardar'),sg.Button('Cerrar')]
-    ]
+        ]
+
     return sg.Window('Segunda Ventana', layout, finalize=True)
 
 
 # Definimos una lista para almacenar los productos
 productos = []
+precios = []
 #Actualizacion tabla de productos
 def act():
     window["ta_p"].update(values=productos)
@@ -340,6 +361,7 @@ while True:
                 nombre = busqueda.title.split()
                 producto = [nombre[1] + " " + nombre[2],capacidades[x] + " GB",preciob, preciov, condicion]
                 productos.append(producto)
+                precios.append(preciov)
                 #Actualizar valores de costos y ganancias
                 preciob = preciob.replace('.', '')       # Eliminar los puntos de la cadena
                 costo_t += float(preciob)
@@ -351,3 +373,5 @@ while True:
                 window1['ttg'].update(gasto)
                 act()
                 producto = []
+        conv_img(pro, precios)
+
