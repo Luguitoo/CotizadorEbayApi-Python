@@ -12,6 +12,12 @@ from PIL import Image #Para cargar las imagenes
 from PIL import ImageDraw #para dibujar
 from PIL import ImageOps #Reescalado
 from PIL import ImageFont #Fuentes
+#Excel
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
+import pandas as pd
+
+from datetime import datetime
 
 r = requests.get('https://www.cambioschaco.com.py') #Url de donde obtener los datos
 soup = BeautifulSoup(r.text, 'html.parser')
@@ -229,14 +235,14 @@ def make_win1():
     col1 = [[sg.Text("Cotización del dia:")],
             [sg.Text(f"Dolar: {cotizacion[0].text} Gs")],
             [sg.Text("Producto:"), sg.Input(key='pro', size=(20, 1))],
-            [sg.Button('Buscar'), sg.Button('Borrar'), sg.Button('Modificar'),],
+            [sg.Button('Buscar'), sg.Button('Borrar'),],
             ]
      # Columna 2:
 
     col2 = [[sg.Button('Opciones', key='-SETTINGS-')],
             [sg.Text(" ",key='bus_p'), sg.Text(" ",key='bus_c')],
             [sg.Table(data, headings=headings, justification='left', key='ta_p', enable_events=True, col_widths=[60, 10, 15, 60])],
-            [sg.Text("Costo total:  "), sg.Text("0",key='ttc'), sg.Text("Ganancias:  "), sg.Text("0",key='ttg'), sg.Button('Exportar presupusto'), sg.Button('Generar publicaciones')]]
+            [sg.Text("Costo total:  "), sg.Text("0",key='ttc'), sg.Text("Ganancias:  "), sg.Text("0",key='ttg'), sg.Button('Exportar presupusto'),]]
 
     layout = [[sg.Column(col1), sg.Column(col2, element_justification='right')]]
 
@@ -354,7 +360,8 @@ while True:
                 # print(titulo)
                 traductor = GoogleTranslator(source='en', target='es')
                 titulo = traductor.translate(busqueda.title)
-                condicion = traductor.translate(busqueda.condition.conditionDisplayName)
+                condicion = traductor.translate(busqueda.condition.conditionDisplayName).split(" - ")
+                condicion = condicion[0]
                 # print(titulo)
                 print(f"Titulo: {busqueda.title}, Precio de Ebay: {preciob}, Precio de venta: {preciov} Gs, Condicion: {condicion}")
                 # Agregamos eñ producto a la lista
@@ -371,7 +378,27 @@ while True:
                 gasto_t += float(preciov)
                 gasto = '{:,.0f}'.format(gasto_t)
                 window1['ttg'].update(gasto)
+                print(productos)
                 act()
                 producto = []
+        #Convierte los precios obtenidos en imagen para postear
         conv_img(pro, precios)
-
+    elif event == 'Exportar presupusto':
+        print("Exportando...")
+        #Cargamos el archivo
+        wb = load_workbook('./recursos/template.xlsx')
+        fecha = datetime.strftime(datetime.now(), '%Y-%m-%d')
+        #indicamos la hoja
+        ws = wb["presupuesto"]
+        #Insertamos los datos en la cabecera
+        ws['B2'] = f"Precios - Fecha: {fecha}"
+        #Insertamos los productos
+        inicio = 4
+        for x in range(0, len(productos)):
+            ws['B{a}'.format(a = str(inicio))] = productos[x][0]
+            ws['D{a}'.format(a = str(inicio))] = productos[x][1]
+            ws['E{a}'.format(a = str(inicio))] = productos[x][3]
+            ws['G{a}'.format(a = str(inicio))] = productos[x][4]
+            inicio += 1
+        #Guarda el archivo
+        wb.save('Presupuesto_{a}.xlsx'.format(a = fecha))
