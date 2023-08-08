@@ -232,16 +232,16 @@ headings= ['Producto', 'Capacidad','Costo', 'Venta', 'Condición']
 data = []
 def make_win1():
     # Columna 1:
-    col1 = [[sg.Text("Cotización del dia:")],
+    col1 = [[sg.Image(filename='./imagenes/logo.png' , size=(100, 80))],
+            [sg.Text("Cotización del dia")],
             [sg.Text(f"Dolar: {cotizacion[0].text} Gs")],
-            [sg.Text("Producto:"), sg.Input(key='pro', size=(20, 1))],
+            [sg.Text("Producto:"), sg.Combo(["Iphone X", "Iphone 11", "Iphone 12", "Iphone 13"], default_value="Iphone X" , key='-COMBO-')],
             [sg.Button('Buscar'), sg.Button('Borrar'),],
             ]
      # Columna 2:
 
     col2 = [[sg.Button('Opciones', key='-SETTINGS-')],
-            [sg.Text(" ",key='bus_p'), sg.Text(" ",key='bus_c')],
-            [sg.Table(data, headings=headings, justification='left', key='ta_p', enable_events=True, col_widths=[60, 10, 15, 60])],
+            [sg.Table(data, headings=headings, justification='left', key='ta_p', enable_events=True, col_widths=[60,60, 60, 60, 60])],
             [sg.Text("Costo total:  "), sg.Text("0",key='ttc'), sg.Text("Ganancias:  "), sg.Text("0",key='ttg'), sg.Button('Exportar presupusto'),]]
 
     layout = [[sg.Column(col1), sg.Column(col2, element_justification='right')]]
@@ -327,9 +327,9 @@ while True:
     elif event == '-SETTINGS-':
         open_win2()   
     elif event == 'Buscar' :
-        pro = (values['pro']).lower()   #minisculas
+        pro = values['-COMBO-'].lower()   #minisculas
         capacidades = []
-        if pro == "iphone x" or pro == "iphone 10":
+        if pro == "iphone x":
                 capacidades = ["64", "256"]
         if pro == "iphone 11":
                 capacidades = ["64","128","256"]
