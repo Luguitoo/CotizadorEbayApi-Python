@@ -276,7 +276,7 @@ def make_win2():
 
     return sg.Window('Segunda Ventana', layout, finalize=True, icon='./recursos/favicon.ico')
 
-
+data_selected = []
 # Definimos una lista para almacenar los productos
 productos = []
 precios = []
@@ -325,7 +325,11 @@ while True:
         if window == window1: # if closing win 1, exit program
             break 
     elif event == '-SETTINGS-':
-        open_win2()   
+        open_win2() 
+    elif event == 'ta_p':
+        data_selected = [productos[row] for row in values[event]]
+        sel = data_selected[0]
+        print(sel)  
     elif event == 'Buscar' :
         pro = values['-COMBO-'].lower()   #minisculas
         capacidades = []
@@ -402,3 +406,9 @@ while True:
             inicio += 1
         #Guarda el archivo
         wb.save('./presupuestos/Presupuesto_{a}.xlsx'.format(a = fecha))
+    elif event == 'Borrar':
+        aux = data_selected[0]
+        if data_selected:
+           while aux in productos:
+               productos.remove(aux)
+               act()
