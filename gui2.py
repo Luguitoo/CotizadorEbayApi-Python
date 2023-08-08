@@ -246,7 +246,7 @@ def make_win1():
 
     layout = [[sg.Column(col1), sg.Column(col2, element_justification='right')]]
 
-    return sg.Window('Cotizaciones de productos', layout, location=(800,600), finalize=True)
+    return sg.Window('Cotizaciones de productos', layout, location=(800,600), finalize=True, icon='./recursos/favicon.ico')
 
 def make_win2():
     #temas
@@ -274,7 +274,7 @@ def make_win2():
             [sg.Button('Guardar'),sg.Button('Cerrar')]
         ]
 
-    return sg.Window('Segunda Ventana', layout, finalize=True)
+    return sg.Window('Segunda Ventana', layout, finalize=True, icon='./recursos/favicon.ico')
 
 
 # Definimos una lista para almacenar los productos
@@ -401,4 +401,4 @@ while True:
             ws['G{a}'.format(a = str(inicio))] = productos[x][4]
             inicio += 1
         #Guarda el archivo
-        wb.save('Presupuesto_{a}.xlsx'.format(a = fecha))
+        wb.save('./presupuestos/Presupuesto_{a}.xlsx'.format(a = fecha))
