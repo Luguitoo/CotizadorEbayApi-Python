@@ -15,5 +15,5 @@ Interfaz de usuario que cotiza los productos importados de la micro-empresa
 ✔️ Guardado de imagenes con los precios actualizados de la busqueda y el tema. <br>
 <img src="https://github.com/Luguitoo/CotizadorEbayApi-Python/assets/112581880/6a690d3e-3f18-49c1-a639-1704048af841" alt="" width="300"/> <br>
 - `Presupuesto`: <br>
-✔️ Planilla excel con los resultados de la busqueda de los productos <br>
+✔️ Planilla excel con los resultados de la busqueda de los productos. <br>
 ![image](https://github.com/Luguitoo/CotizadorEbayApi-Python/assets/112581880/da85f556-0f2b-45f5-9b48-e07862d616be)
