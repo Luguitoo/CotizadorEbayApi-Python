@@ -270,11 +270,11 @@ def make_win2():
             [sg.Text("Ganacias:"), sg.Input(key='ganancias', size=(20, 1), default_text=config_data.get('Profits')), sg.Text("USD")],
             [sg.Text("Costo envio:"), sg.Input(key='ship', size=(20, 1), default_text=config_data.get('Shipping')), sg.Text("USD")],
             [sg.Text("Tema de imagenes: ")],
-            *tema_imagenes,  # Utilizamos el operador * para desempaquetar la lista de opciones del tema
+            *tema_imagenes,  # Utilizamos el operador * para desempaquetar la lista de opciones del  ema
             [sg.Button('Guardar'),sg.Button('Cerrar')]
         ]
 
-    return sg.Window('Segunda Ventana', layout, finalize=True, icon='./recursos/favicon.ico')
+    return sg.Window('Opciones', layout, finalize=True, icon='./recursos/favicon.ico')
 
 data_selected = []
 # Definimos una lista para almacenar los productos
